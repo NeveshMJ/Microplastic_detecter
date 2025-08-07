@@ -222,6 +222,53 @@ class WebCameraCaptureAnalyzer:
             print(f"❌ Error extracting text: {e}")
             return ""
     
+    def validate_ingredient_content(self, text: str) -> bool:
+        """Validate if the extracted text contains ingredient-like content"""
+        if not text or len(text.strip()) < 10:
+            return False
+        
+        text_lower = text.lower()
+        
+        # Look for ingredient indicators
+        ingredient_keywords = [
+            'ingredients', 'inci', 'composition', 'contains', 'formula',
+            'aqua', 'water', 'glycerin', 'alcohol', 'parfum', 'fragrance',
+            'sodium', 'acid', 'oil', 'extract', 'oxide', 'sulfate',
+            'paraben', 'silicone', 'dimethicone', 'cetyl', 'stearyl'
+        ]
+        
+        # Check for common cosmetic ingredient patterns
+        cosmetic_patterns = [
+            r'\b\w*acid\b',  # Various acids
+            r'\b\w*yl\b',    # Common endings like cetyl, stearyl
+            r'\b\w*ate\b',   # Sulfates, acetates, etc.
+            r'\b\w*ol\b',    # Alcohols
+            r'\b\w*ene\b',   # Glycol compounds
+            r'aqua|water',   # Water/aqua
+            r'ci \d+',       # Color index
+            r'fd&c',         # Food coloring
+        ]
+        
+        # Count matches
+        keyword_matches = sum(1 for keyword in ingredient_keywords if keyword in text_lower)
+        pattern_matches = sum(1 for pattern in cosmetic_patterns if re.search(pattern, text_lower))
+        
+        # Check for ingredient list structure (commas, chemical names)
+        comma_count = text.count(',')
+        has_chemical_structure = bool(re.search(r'\b[a-z]{3,}\s*[a-z]{3,}', text_lower))
+        
+        # Validation criteria
+        min_matches_needed = 2
+        min_comma_count = 2
+        
+        is_valid = (
+            (keyword_matches >= min_matches_needed or pattern_matches >= min_matches_needed) and
+            (comma_count >= min_comma_count or has_chemical_structure) and
+            len(text.split()) >= 5  # At least 5 words
+        )
+        
+        return is_valid
+    
     def parse_ingredients(self, text: str) -> List[str]:
         """Parse and clean ingredient list from extracted text"""
         if not text:
@@ -298,6 +345,10 @@ class WebCameraCaptureAnalyzer:
         
         if not extracted_text:
             return {"error": "Could not extract text from image. Try better lighting or clearer image."}
+        
+        # Validate if the extracted text contains ingredient-like content
+        if not self.validate_ingredient_content(extracted_text):
+            return {"error": "Invalid input: This image does not appear to contain a cosmetic ingredient list. Please upload an image showing the ingredients section of a cosmetic product."}
         
         # Extract ingredients
         ingredients_list = self.parse_ingredients(extracted_text)
@@ -509,6 +560,28 @@ def capture_image():
     try:
         ret, frame = cap.read()
         if ret and frame is not None:
+            # Flip frame for consistency with preview
+            frame = cv2.flip(frame, 1)
+            
+            # Basic image quality check
+            if frame.size == 0:
+                return jsonify({'error': 'Captured image is empty'})
+            
+            # Check if image is too dark or too bright
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            mean_brightness = np.mean(gray)
+            
+            if mean_brightness < 30:
+                return jsonify({
+                    'error': 'Image too dark - please ensure good lighting',
+                    'warning': True
+                })
+            elif mean_brightness > 220:
+                return jsonify({
+                    'error': 'Image too bright - adjust lighting or camera position',
+                    'warning': True
+                })
+            
             # Save captured image
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             image_path = f"static/captures/captured_{timestamp}.jpg"

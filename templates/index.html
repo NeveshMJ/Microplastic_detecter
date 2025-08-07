@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -329,11 +328,11 @@
             .main-content {
                 grid-template-columns: 1fr;
             }
-            
+
             .btn-group {
                 flex-direction: column;
             }
-            
+
             .btn {
                 width: 100%;
                 margin: 5px 0;
@@ -363,7 +362,7 @@
                             📷 Click "Start Camera" to begin
                         </div>
                     </div>
-                    
+
                     <div class="btn-group">
                         <button id="start-camera" class="btn">Start Camera</button>
                         <button id="capture-btn" class="btn btn-success" disabled>📸 Capture</button>
@@ -441,37 +440,37 @@
         document.getElementById('start-camera').addEventListener('click', function() {
             const feed = document.getElementById('camera-feed');
             const placeholder = document.getElementById('camera-placeholder');
-            
+
             feed.style.display = 'block';
             placeholder.style.display = 'none';
-            
+
             document.getElementById('start-camera').disabled = true;
             document.getElementById('capture-btn').disabled = false;
             document.getElementById('stop-camera').disabled = false;
-            
+
             cameraActive = true;
         });
 
         document.getElementById('stop-camera').addEventListener('click', function() {
             const feed = document.getElementById('camera-feed');
             const placeholder = document.getElementById('camera-placeholder');
-            
+
             feed.style.display = 'none';
             placeholder.style.display = 'block';
-            
+
             document.getElementById('start-camera').disabled = false;
             document.getElementById('capture-btn').disabled = true;
             document.getElementById('stop-camera').disabled = true;
-            
+
             cameraActive = false;
         });
 
         // Capture image
         document.getElementById('capture-btn').addEventListener('click', function() {
             if (!cameraActive) return;
-            
+
             showLoading();
-            
+
             fetch('/capture_image', {
                 method: 'POST',
                 headers: {
@@ -484,7 +483,7 @@
                 if (data.success) {
                     capturedImagePath = data.image_path;
                     showAlert('success', data.message + ' Ready to analyze!');
-                    
+
                     // Auto-analyze after capture
                     analyzeImage(capturedImagePath, 
                                document.getElementById('product-name').value,
@@ -503,12 +502,12 @@
         document.getElementById('file-input').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
-            
+
             const formData = new FormData();
             formData.append('file', file);
-            
+
             showLoading();
-            
+
             fetch('/upload_image', {
                 method: 'POST',
                 body: formData
@@ -533,7 +532,7 @@
         // Analyze uploaded image
         document.getElementById('upload-analyze-btn').addEventListener('click', function() {
             if (!capturedImagePath) return;
-            
+
             analyzeImage(capturedImagePath,
                         document.getElementById('upload-product-name').value,
                         document.getElementById('upload-brand-name').value);
@@ -542,7 +541,7 @@
         // Analyze image function
         function analyzeImage(imagePath, productName, brandName) {
             showLoading();
-            
+
             fetch('/analyze_image', {
                 method: 'POST',
                 headers: {
@@ -558,8 +557,15 @@
             .then(data => {
                 hideLoading();
                 if (data.error) {
-                    showAlert('error', 'Analysis failed: ' + data.error);
-                } else {
+                        if (data.error.includes('Invalid input')) {
+                            showAlert(data.error + '\n\nTip: Make sure the image shows a clear view of the ingredients list on a cosmetic product label.', 'error');
+                        } else if (data.warning) {
+                            showAlert(data.error, 'warning');
+                        } else {
+                            showAlert(data.error, 'error');
+                        }
+                        return;
+                    } else {
                     displayResults(data);
                     showAlert('success', 'Analysis complete!');
                 }
@@ -574,11 +580,11 @@
         function displayResults(results) {
             const resultsSection = document.getElementById('results-section');
             const resultsContent = document.getElementById('results-content');
-            
+
             let scoreClass = 'score-green';
             if (results.safety_score < 50) scoreClass = 'score-red';
             else if (results.safety_score < 80) scoreClass = 'score-yellow';
-            
+
             let html = `
                 <div class="safety-score">
                     <div class="score-circle ${scoreClass}">
@@ -595,7 +601,7 @@
                     <strong>Total Ingredients:</strong> ${results.total_ingredients}
                 </div>
             `;
-            
+
             // Harmful microplastics
             if (results.microplastics_found.red.length > 0) {
                 html += `
@@ -616,7 +622,7 @@
                 });
                 html += '</div>';
             }
-            
+
             // Safe ingredients
             if (results.microplastics_found.green.length > 0) {
                 html += `
@@ -636,7 +642,7 @@
                 }
                 html += '</div>';
             }
-            
+
             resultsContent.innerHTML = html;
             resultsSection.classList.remove('hidden');
             resultsSection.scrollIntoView({ behavior: 'smooth' });
@@ -657,20 +663,20 @@
         // Display history
         function displayHistory(history) {
             const historyContent = document.getElementById('history-content');
-            
+
             if (history.length === 0) {
                 historyContent.innerHTML = '<p>No scan history found.</p>';
                 return;
             }
-            
+
             let html = '';
             history.forEach(item => {
                 const [id, productName, brand, safetyScore, safetyLevel, totalIngredients, microplasticCount, scanDate] = item;
-                
+
                 let statusIcon = '✅';
                 if (safetyLevel === 'YELLOW') statusIcon = '⚠️';
                 else if (safetyLevel === 'RED') statusIcon = '❌';
-                
+
                 html += `
                     <div class="history-item">
                         <div>
@@ -681,7 +687,7 @@
                     </div>
                 `;
             });
-            
+
             historyContent.innerHTML = html;
         }
 
@@ -694,16 +700,23 @@
             document.getElementById('loading').style.display = 'none';
         }
 
-        function showAlert(type, message) {
+        function showAlert(message, type) {
             const alertDiv = document.createElement('div');
             alertDiv.className = `alert alert-${type}`;
+            alertDiv.style.whiteSpace = 'pre-line'; // Preserve line breaks
             alertDiv.textContent = message;
-            
-            document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.main-content'));
-            
+
+            // Insert at top of main container
+            const container = document.querySelector('.container');
+            container.insertBefore(alertDiv, container.firstChild);
+
+            // Auto remove after appropriate time
+            const timeout = type === 'warning' ? 7000 : 5000;
             setTimeout(() => {
-                alertDiv.remove();
-            }, 5000);
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, timeout);
         }
 
         // Auto-load history on page load

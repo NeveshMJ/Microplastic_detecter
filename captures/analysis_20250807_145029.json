@@ -1,0 +1,37 @@
+{
+  "product_name": "Lipbalm",
+  "brand": "Lakme",
+  "image_path": "captures/captured_20250807_145017.jpg",
+  "ingredients": "Rugyrosperum Eugenol Cautions, Butters The Color May Vary Over Time Hoxeves, Effcacy Remains Unchanged Net Wt 8G  028 02 Ma Product",
+  "microplastics_found": {
+    "red": [
+      {
+        "ingredient": "Rugyrosperum Eugenol Cautions",
+        "matched_as": "Polyethylene",
+        "confidence": 1.0,
+        "risk_level": "RED",
+        "health_concerns": [
+          "Marine pollution",
+          "Bioaccumulation",
+          "Banned in many countries"
+        ],
+        "category": "Polyolefin"
+      }
+    ],
+    "orange": [],
+    "green": [
+      {
+        "ingredient": "Butters The Color May Vary Over Time Hoxeves"
+      },
+      {
+        "ingredient": "Effcacy Remains Unchanged Net Wt 8G  028 02 Ma Product"
+      }
+    ]
+  },
+  "safety_rating": "CAUTION",
+  "risk_level": "YELLOW",
+  "warnings": "Found 1 microplastic ingredient(s)",
+  "extracted_text": "Rugyrosperum Eugenol Cautions:  butters the color may vary over time Hoxeves, effcacy remains unchanged Net Wt 8g @ 028 02 MA product",
+  "total_ingredients": 3,
+  "safety_score": 75
+}

@@ -1,0 +1,38 @@
+{
+  "red_ingredients": [
+    "polydimethylsiloxane",
+    "dimethicone",
+    "polyethylene",
+    "polypropylene",
+    "polystyrene",
+    "polytetrafluoroethylene",
+    "polyurethane",
+    "polyacrylate",
+    "polymethacrylate",
+    "polytrimethylsiloxysilicate"
+  ],
+  "orange_ingredients": [
+    "polyvinyl alcohol",
+    "polyethylene glycol",
+    "polylactic acid"
+  ],
+  "green_ingredients": [
+    "cellulose",
+    "cornstarch",
+    "rice powder",
+    "bamboo extract"
+  ],
+  "microplastic_list": [
+    "poly (1,4-cis-isoprene)",
+    "poly (2-hydroxyethyl methacrylate)",
+    "polyacrylate",
+    "polyacrylonitrile",
+    "polydimethylsiloxane",
+    "polyethylene",
+    "polypropylene",
+    "polystyrene",
+    "polyurethane",
+    "polyvinyl chloride",
+    "polytrimethylsiloxysilicate"
+  ]
+}

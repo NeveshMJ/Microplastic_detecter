@@ -1,0 +1,30 @@
+{
+  "product_name": "lipbalm",
+  "brand": "nika",
+  "image_path": "captures/captured_20250807_202325.jpg",
+  "ingredients": "Ingredients Petrolatum Sopropa Mynstate Mangiera Indca  Seed Butter Prunus Ou Oils And May Vary Over Time Honevel Unchanged",
+  "microplastics_found": {
+    "red": [
+      {
+        "ingredient": "Ingredients Petrolatum Sopropa Mynstate Mangiera Indca  Seed Butter Prunus Ou Oils And May Vary Over Time Honevel Unchanged",
+        "matched_as": "Polyethylene",
+        "confidence": 1.0,
+        "risk_level": "RED",
+        "health_concerns": [
+          "Marine pollution",
+          "Bioaccumulation",
+          "Banned in many countries"
+        ],
+        "category": "Polyolefin"
+      }
+    ],
+    "orange": [],
+    "green": []
+  },
+  "safety_rating": "CAUTION",
+  "risk_level": "YELLOW",
+  "warnings": "Found 1 microplastic ingredient(s)",
+  "extracted_text": "Ingredients; Petrolatum [sopropA Mynstate Mangiera Indca (Mango) Seed Butter; Prunus ou oils and may vary over time Honevel unchanged",
+  "total_ingredients": 1,
+  "safety_score": 75
+}

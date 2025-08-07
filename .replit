@@ -1,0 +1,9 @@
+modules = ["python-3.12"]
+run = "python camera_capture_analyzer.py"
+
+[nix]
+channel = "stable-25_05"
+packages = ["hdf5", "libGL", "libGLU", "rapidfuzz-cpp", "taskflow", "tesseract"]
+
+[deployment]
+run = ["sh", "-c", "python camera_capture_analyzer.py"]

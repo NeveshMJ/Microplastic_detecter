@@ -1,0 +1,715 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microplastic Detection System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+
+        .camera-section {
+            text-align: center;
+        }
+
+        .camera-container {
+            position: relative;
+            margin: 20px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f7fafc;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #camera-feed {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .camera-placeholder {
+            color: #a0aec0;
+            font-size: 1.1em;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(135deg, #3182ce, #2c5282);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(66, 153, 225, 0.4);
+        }
+
+        .btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #38a169, #2f855a);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ed8936, #dd6b20);
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #dd6b20, #c05621);
+            box-shadow: 0 4px 15px rgba(237, 137, 54, 0.4);
+        }
+
+        .input-group {
+            margin: 15px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .file-upload input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-upload-label {
+            display: block;
+            padding: 12px;
+            border: 2px dashed #4299e1;
+            border-radius: 8px;
+            text-align: center;
+            background: #f7fafc;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover .file-upload-label {
+            background: #edf2f7;
+            border-color: #3182ce;
+        }
+
+        .results-section {
+            margin-top: 30px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .safety-score {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .score-green { background: linear-gradient(135deg, #48bb78, #38a169); }
+        .score-yellow { background: linear-gradient(135deg, #ed8936, #dd6b20); }
+        .score-red { background: linear-gradient(135deg, #f56565, #e53e3e); }
+
+        .ingredients-list {
+            margin: 20px 0;
+        }
+
+        .ingredient-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            background: #f7fafc;
+        }
+
+        .ingredient-safe { border-left: 4px solid #48bb78; }
+        .ingredient-warning { border-left: 4px solid #ed8936; }
+        .ingredient-danger { border-left: 4px solid #f56565; }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-safe { background: #48bb78; }
+        .status-warning { background: #ed8936; }
+        .status-danger { background: #f56565; }
+
+        .history-section {
+            margin-top: 30px;
+        }
+
+        .history-item {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #2f855a;
+            border: 1px solid #9ae6b4;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #fbb6ce;
+        }
+
+        .alert-info {
+            background: #bee3f8;
+            color: #2c5282;
+            border: 1px solid #90cdf4;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #4299e1;
+            font-weight: 600;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4299e1;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔬 Microplastic Detection System</h1>
+            <p>Analyze cosmetic products for harmful microplastic ingredients using your camera</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Camera Section -->
+            <div class="card">
+                <h2>📹 Live Camera Analysis</h2>
+                <div class="camera-section">
+                    <div class="camera-container">
+                        <img id="camera-feed" src="/camera_feed" alt="Camera feed" style="display: none;">
+                        <div id="camera-placeholder" class="camera-placeholder">
+                            📷 Click "Start Camera" to begin
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button id="start-camera" class="btn">Start Camera</button>
+                        <button id="capture-btn" class="btn btn-success" disabled>📸 Capture</button>
+                        <button id="stop-camera" class="btn btn-warning" disabled>Stop Camera</button>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="product-name">Product Name (Optional)</label>
+                        <input type="text" id="product-name" placeholder="e.g., Moisturizer">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="brand-name">Brand Name (Optional)</label>
+                        <input type="text" id="brand-name" placeholder="e.g., Brand XYZ">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="card">
+                <h2>📤 Upload Image Analysis</h2>
+                <div class="input-group">
+                    <label>Upload Product Image</label>
+                    <div class="file-upload">
+                        <input type="file" id="file-input" accept="image/*">
+                        <label for="file-input" class="file-upload-label">
+                            📁 Choose image file or drag & drop
+                        </label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="upload-product-name">Product Name (Optional)</label>
+                    <input type="text" id="upload-product-name" placeholder="e.g., Foundation">
+                </div>
+
+                <div class="input-group">
+                    <label for="upload-brand-name">Brand Name (Optional)</label>
+                    <input type="text" id="upload-brand-name" placeholder="e.g., Brand ABC">
+                </div>
+
+                <button id="upload-analyze-btn" class="btn" disabled>🔬 Analyze Upload</button>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Analyzing product ingredients...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" class="results-section hidden">
+            <div class="result-card">
+                <h2>🔬 Analysis Results</h2>
+                <div id="results-content"></div>
+            </div>
+        </div>
+
+        <!-- History Section -->
+        <div class="history-section">
+            <div class="card">
+                <h2>📚 Scan History</h2>
+                <button id="load-history-btn" class="btn">Load History</button>
+                <div id="history-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let cameraActive = false;
+        let capturedImagePath = null;
+
+        // Camera controls
+        document.getElementById('start-camera').addEventListener('click', function() {
+            const feed = document.getElementById('camera-feed');
+            const placeholder = document.getElementById('camera-placeholder');
+            
+            feed.style.display = 'block';
+            placeholder.style.display = 'none';
+            
+            document.getElementById('start-camera').disabled = true;
+            document.getElementById('capture-btn').disabled = false;
+            document.getElementById('stop-camera').disabled = false;
+            
+            cameraActive = true;
+        });
+
+        document.getElementById('stop-camera').addEventListener('click', function() {
+            const feed = document.getElementById('camera-feed');
+            const placeholder = document.getElementById('camera-placeholder');
+            
+            feed.style.display = 'none';
+            placeholder.style.display = 'block';
+            
+            document.getElementById('start-camera').disabled = false;
+            document.getElementById('capture-btn').disabled = true;
+            document.getElementById('stop-camera').disabled = true;
+            
+            cameraActive = false;
+        });
+
+        // Capture image
+        document.getElementById('capture-btn').addEventListener('click', function() {
+            if (!cameraActive) return;
+            
+            showLoading();
+            
+            fetch('/capture_image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    capturedImagePath = data.image_path;
+                    showAlert('success', data.message + ' Ready to analyze!');
+                    
+                    // Auto-analyze after capture
+                    analyzeImage(capturedImagePath, 
+                               document.getElementById('product-name').value,
+                               document.getElementById('brand-name').value);
+                } else {
+                    showAlert('error', 'Capture failed: ' + data.error);
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showAlert('error', 'Capture failed: ' + error.message);
+            });
+        });
+
+        // File upload
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            showLoading();
+            
+            fetch('/upload_image', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    capturedImagePath = data.image_path;
+                    document.getElementById('upload-analyze-btn').disabled = false;
+                    showAlert('success', data.message);
+                } else {
+                    showAlert('error', 'Upload failed: ' + data.error);
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showAlert('error', 'Upload failed: ' + error.message);
+            });
+        });
+
+        // Analyze uploaded image
+        document.getElementById('upload-analyze-btn').addEventListener('click', function() {
+            if (!capturedImagePath) return;
+            
+            analyzeImage(capturedImagePath,
+                        document.getElementById('upload-product-name').value,
+                        document.getElementById('upload-brand-name').value);
+        });
+
+        // Analyze image function
+        function analyzeImage(imagePath, productName, brandName) {
+            showLoading();
+            
+            fetch('/analyze_image', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    image_path: imagePath,
+                    product_name: productName,
+                    brand: brandName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.error) {
+                    showAlert('error', 'Analysis failed: ' + data.error);
+                } else {
+                    displayResults(data);
+                    showAlert('success', 'Analysis complete!');
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                showAlert('error', 'Analysis failed: ' + error.message);
+            });
+        }
+
+        // Display results
+        function displayResults(results) {
+            const resultsSection = document.getElementById('results-section');
+            const resultsContent = document.getElementById('results-content');
+            
+            let scoreClass = 'score-green';
+            if (results.safety_score < 50) scoreClass = 'score-red';
+            else if (results.safety_score < 80) scoreClass = 'score-yellow';
+            
+            let html = `
+                <div class="safety-score">
+                    <div class="score-circle ${scoreClass}">
+                        ${results.safety_score}/100
+                    </div>
+                    <h3>${results.safety_rating}</h3>
+                    <p><strong>Risk Level:</strong> ${results.risk_level}</p>
+                    <p>${results.warnings}</p>
+                </div>
+
+                <div class="input-group">
+                    <strong>Product:</strong> ${results.product_name || 'Unknown Product'}<br>
+                    <strong>Brand:</strong> ${results.brand || 'Unknown Brand'}<br>
+                    <strong>Total Ingredients:</strong> ${results.total_ingredients}
+                </div>
+            `;
+            
+            // Harmful microplastics
+            if (results.microplastics_found.red.length > 0) {
+                html += `
+                    <h4>🔴 Harmful Microplastics Found (${results.microplastics_found.red.length})</h4>
+                    <div class="ingredients-list">
+                `;
+                results.microplastics_found.red.forEach(item => {
+                    html += `
+                        <div class="ingredient-item ingredient-danger">
+                            <div class="status-indicator status-danger"></div>
+                            <div>
+                                <strong>${item.ingredient}</strong><br>
+                                <small>Matched as: ${item.matched_as} (${Math.round(item.confidence * 100)}% confidence)</small><br>
+                                <small>Category: ${item.category}</small>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+            }
+            
+            // Safe ingredients
+            if (results.microplastics_found.green.length > 0) {
+                html += `
+                    <h4>🟢 Safe Ingredients (${results.microplastics_found.green.length})</h4>
+                    <div class="ingredients-list">
+                `;
+                results.microplastics_found.green.slice(0, 10).forEach(item => {
+                    html += `
+                        <div class="ingredient-item ingredient-safe">
+                            <div class="status-indicator status-safe"></div>
+                            <span>${item.ingredient}</span>
+                        </div>
+                    `;
+                });
+                if (results.microplastics_found.green.length > 10) {
+                    html += `<p><em>... and ${results.microplastics_found.green.length - 10} more safe ingredients</em></p>`;
+                }
+                html += '</div>';
+            }
+            
+            resultsContent.innerHTML = html;
+            resultsSection.classList.remove('hidden');
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Load history
+        document.getElementById('load-history-btn').addEventListener('click', function() {
+            fetch('/history')
+            .then(response => response.json())
+            .then(data => {
+                displayHistory(data);
+            })
+            .catch(error => {
+                showAlert('error', 'Failed to load history: ' + error.message);
+            });
+        });
+
+        // Display history
+        function displayHistory(history) {
+            const historyContent = document.getElementById('history-content');
+            
+            if (history.length === 0) {
+                historyContent.innerHTML = '<p>No scan history found.</p>';
+                return;
+            }
+            
+            let html = '';
+            history.forEach(item => {
+                const [id, productName, brand, safetyScore, safetyLevel, totalIngredients, microplasticCount, scanDate] = item;
+                
+                let statusIcon = '✅';
+                if (safetyLevel === 'YELLOW') statusIcon = '⚠️';
+                else if (safetyLevel === 'RED') statusIcon = '❌';
+                
+                html += `
+                    <div class="history-item">
+                        <div>
+                            <strong>${statusIcon} ${productName || 'Unknown Product'}</strong><br>
+                            <small>${brand || 'Unknown Brand'} | Score: ${safetyScore}/100 | Microplastics: ${microplasticCount}</small><br>
+                            <small>${new Date(scanDate).toLocaleString()}</small>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            historyContent.innerHTML = html;
+        }
+
+        // Utility functions
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.main-content'));
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Auto-load history on page load
+        window.addEventListener('load', function() {
+            document.getElementById('load-history-btn').click();
+        });
+    </script>
+</body>
+</html>

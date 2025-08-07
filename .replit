@@ -7,3 +7,15 @@ packages = ["hdf5", "libGL", "libGLU", "rapidfuzz-cpp", "taskflow", "tesseract"]
 
 [deployment]
 run = ["sh", "-c", "python camera_capture_analyzer.py"]
+
+[workflows]
+runButton = "Run Web App"
+
+[[workflows.workflow]]
+name = "Run Web App"
+author = 46112230
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python app.py"
